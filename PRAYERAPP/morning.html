@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Morning Adhkar</title>
+
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Amiri&display=swap" rel="stylesheet">
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="app">
+
+<!-- Back Button -->
+<button class="back-btn" onclick="goHome()">←</button>
+
+  <!-- Header -->
+  <div class="header">
+    <h1>🌅 Morning Adhkar</h1>
+    <p class="subtitle">Start your day with remembrance</p>
+  </div>
+
+  <!-- Card -->
+  <div class="section">
+    <label>Select an Adhkar</label>
+    <select id="adhkarSelect" onchange="showAdhkar()"></select>
+
+    <div id="adhkarText" class="placeholder">
+      Please select an Adhkar
+    </div>
+  </div>
+
+</div>
+
+<script>
+const adhkarSelect = document.getElementById("adhkarSelect");
+const adhkarText = document.getElementById("adhkarText");
+
+const morningAdhkar = [
+ [
+"Morning Opening Dua",
+`أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ رَبِّ الْعَالَمِينَ، اللَّهُمَّ إِنِّي أَسْأَلُكَ خَيْرَ هَذَا الْيَوْمِ فَتْحَهُ وَنَصْرَهُ وَنُورَهُ وَبَرَكَتَهُ وَهُدَاهُ، وَأَعُوذُ بِكَ مِنْ شَرِّ مَا فِيهِ وَشَرِّ مَا بَعْدَهُ`,
+`Asbahna wa asbahal mulku lillahi rabbil ‘alameen, Allahumma inni as’aluka khayra hadha al-yawm fathahu wa nasrahu wa nurahu wa barakatahu wa hudahu wa a‘udhu bika min sharri ma fihi wa sharri ma ba‘dah`,
+`We have entered the morning and all dominion belongs to Allah, Lord of the worlds. O Allah, I ask You for the good of this day—its opening, victory, light, blessing, and guidance—and I seek refuge in You from its evil and what comes after it.`,
+["A comprehensive morning dua asking Allah for guidance, protection, and blessings for the entire day."]
+],
+
+[
+"Sayyidul Istighfar",
+`اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي، فَاغْفِرْ لِي فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ`,
+`Allahumma anta rabbi la ilaha illa anta khalaqtani wa ana ‘abduka wa ana ‘ala ‘ahdika wa wa‘dika mastata‘tu a‘udhu bika min sharri ma sana‘tu abu’u laka bini‘matika ‘alayya wa abu’u bidhanbi faghfir li fa innahu la yaghfirudh-dhunuba illa anta`,
+`O Allah, You are my Lord, there is no god but You. You created me and I am Your servant. I uphold Your covenant and promise as best as I can. I seek refuge in You from the evil I have done. I acknowledge Your blessings upon me and I acknowledge my sins, so forgive me, for none forgives sins except You.`,
+["The most powerful forgiveness dua. Whoever says it with sincerity in the morning will enter Paradise if they die that day."]
+],
+
+[
+"Protection from Harm",
+`بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ`,
+`Bismillahilladhi la yadurru ma‘asmihi shay’un fil-ardi wa la fis-sama’i wa huwas-sami‘ul-‘aleem`,
+`In the name of Allah, with whose name nothing in the earth or the sky can cause harm, and He is the All-Hearing, All-Knowing.`,
+["Protection from all harm throughout the day when recited in the morning (3 times)."]
+],
+
+[
+"Reliance on Allah",
+`اللَّهُمَّ بِكَ أَصْبَحْنَا وَبِكَ أَمْسَيْنَا وَبِكَ نَحْيَا وَبِكَ نَمُوتُ وَإِلَيْكَ النُّشُورُ`,
+`Allahumma bika asbahna wa bika amsayna wa bika nahya wa bika namootu wa ilaykan nushoor`,
+`O Allah, by You we enter the morning, by You we enter the evening, by You we live and die, and to You is our resurrection.`,
+["Reminds the believer that all life, death, and return is to Allah alone."]
+],
+
+[
+"Contentment with Deen",
+`رَضِيتُ بِاللَّهِ رَبًّا وَبِالإِسْلَامِ دِينًا وَبِمُحَمَّدٍ نَبِيًّا`,
+`Radheetu billahi rabban wa bil-islami deenan wa bi Muhammadin nabiyyan`,
+`I am pleased with Allah as my Lord, Islam as my religion, and Muhammad as my Prophet.`,
+["Brings peace, stability, and satisfaction in faith."]
+],
+
+[
+"Seeking Forgiveness",
+`أَسْتَغْفِرُ اللَّهَ وَأَتُوبُ إِلَيْهِ`,
+`Astaghfirullaha wa atoobu ilayh`,
+`I seek forgiveness from Allah and repent to Him.`,
+["Purifies the heart and removes sins throughout the day."]
+],
+
+[
+"Protection from Anxiety",
+`اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ`,
+`Allahumma inni a‘udhu bika minal hammi wal hazan`,
+`O Allah, I seek refuge in You from worry and sadness.`,
+["Helps relieve emotional stress and anxiety."]
+],
+
+[
+"Light of Guidance",
+`اللَّهُمَّ اجْعَلْ فِي قَلْبِي نُورًا وَفِي لِسَانِي نُورًا وَفِي سَمْعِي نُورًا وَفِي بَصَرِي نُورًا`,
+`Allahumma aj‘al fi qalbi nooran wa fi lisani nooran wa fi sam‘i nooran wa fi basari nooran`,
+`O Allah, place light in my heart, my tongue, my hearing, and my sight.`,
+["Asks Allah for spiritual clarity and guidance."]
+],
+
+[
+"Ease in Affairs",
+`رَبِّ اشْرَحْ لِي صَدْرِي وَيَسِّرْ لِي أَمْرِي`,
+`Rabbi ishrah li sadri wa yassir li amri`,
+`My Lord, expand my chest and make my affairs easy.`,
+["Helps reduce stress and makes tasks easier."]
+],
+
+[
+"Morning Blessing",
+`اللَّهُمَّ بَارِكْ لَنَا فِي يَوْمِنَا هَذَا`,
+`Allahumma barik lana fi yawmina hadha`,
+`O Allah, bless us in this day of ours.`,
+["Asks Allah to place barakah (blessing) in the entire day."]
+]
+
+];
+// Default option
+const defaultOption = document.createElement("option");
+defaultOption.textContent = "Select an Adhkar";
+defaultOption.disabled = true;
+defaultOption.selected = true;
+adhkarSelect.appendChild(defaultOption);
+
+// Populate dropdown
+morningAdhkar.forEach((a, i) => {
+  const option = document.createElement("option");
+  option.value = i;
+  option.textContent = a[0];
+  adhkarSelect.appendChild(option);
+});
+
+// Show Adhkar
+function showAdhkar() {
+  const index = adhkarSelect.value;
+
+  const a = morningAdhkar[index];
+
+  adhkarText.className = "fade";
+  adhkarText.innerHTML = `
+    <div class="arabic">${a[1]}</div>
+    <div class="transliteration">${a[2]}</div>
+    <div class="translation">${a[3]}</div>
+    <div class="explanation">${a[4][0]}</div>
+  `;
+}
+
+function goHome() {
+  window.location.href = "index.html";
+}
+
+/* ================= SWIPE BACK ================= */
+
+let startX = 0;
+let currentX = 0;
+let isSwiping = false;
+
+const app = document.querySelector(".app");
+
+// Start swipe (ONLY from left edge)
+document.addEventListener("touchstart", (e) => {
+  startX = e.touches[0].clientX;
+
+  if (startX < 40) {
+    isSwiping = true;
+    app.classList.add("swiping"); // shadow effect
+  }
+});
+
+// Move
+document.addEventListener("touchmove", (e) => {
+  if (!isSwiping) return;
+
+  currentX = e.touches[0].clientX;
+  let diff = currentX - startX;
+
+  if (diff > 0) {
+    // Add resistance (feels more natural)
+    let move = diff * 0.9;
+
+    app.style.transform = `translateX(${move}px)`;
+  }
+});
+
+// End
+document.addEventListener("touchend", () => {
+  if (!isSwiping) return;
+
+  let diff = currentX - startX;
+
+  if (diff > 120) {
+    // Successful swipe
+    app.style.transform = "translateX(100%)";
+
+    setTimeout(() => {
+      goHome();
+    }, 200);
+  } else {
+    // Snap back
+    app.style.transform = "translateX(0)";
+  }
+
+  app.classList.remove("swiping");
+  isSwiping = false;
+});
+function goBack() {
+    window.location.href = "index.html"; 
+    // replace with your dashboard file
+}
+</script>
+</script>
+
+</body>
+</html>

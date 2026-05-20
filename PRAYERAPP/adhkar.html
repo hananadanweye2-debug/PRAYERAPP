@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Adhkar</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+  <h2>📿 Adhkar</h2>
+
+  <!-- Category Selector -->
+  <div class="card">
+    <select id="category" onchange="loadAdhkar()">
+      <option value="morning">Morning</option>
+      <option value="evening">Evening</option>
+      <option value="afterPrayer">After Prayer</option>
+    </select>
+  </div>
+
+  <!-- Adhkar List -->
+  <div id="adhkarList"></div>
+
+</div>
+<!-- Bottom Navbar -->
+<div class="navbar">
+  <a href="index.html">🏠 Home</a>
+  <a href="adhkar.html">📿 Adhkar</a>
+  <a href="duas.html">🤲 Duas</a>
+  <a href="quran.html">📖 Quran</a>
+  <a href="tasbeeh.html">🔢 Tasbeeh</a>
+</div>
+
+<script src="adhkar.js"></script>
+</body>
+</html>

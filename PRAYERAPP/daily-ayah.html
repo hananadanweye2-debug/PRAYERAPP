@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Daily Ayah</title>
+
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #F4F7F6;
+  margin: 0;
+  padding: 20px;
+  transition: 0.3s;
+}
+
+/* 🌙 DARK MODE */
+body.dark {
+  background: #121212;
+  color: white;
+}
+
+.card {
+  max-width: 550px;
+  margin: 50px auto;
+  background: white;
+  padding: 25px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+  transition: 0.3s;
+}
+
+body.dark .card {
+  background: #1e1e1e;
+}
+
+/* TEXT */
+.arabic {
+  font-size: 26px;
+  margin: 15px 0;
+  line-height: 2;
+}
+
+.trans {
+  font-size: 14px;
+  color: #2c7a7b;
+  font-style: italic;
+}
+
+.translation {
+  font-size: 15px;
+  margin: 10px 0;
+}
+
+/* BUTTONS */
+button {
+  margin: 5px;
+  padding: 10px 12px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  background: #1F7A63;
+  color: white;
+  transition: 0.2s;
+}
+
+button:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+}
+
+.top-bar {
+  display: flex;
+  justify-content: space-between;
+  max-width: 550px;
+  margin: auto;
+}
+
+/* SAVED BOX */
+.saved-item {
+  margin-top: 10px;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  transition: 0.2s;
+}
+
+.saved-item:hover {
+  transform: scale(1.01);
+  background: rgba(0,0,0,0.03);
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="top-bar">
+  <button onclick="toggleDark()">🌙</button>
+  <button onclick="shareAyah()">📤</button>
+</div>
+
+<div class="card">
+
+  <h2>📖 Today's Ayah</h2>
+
+  <div id="ayahBox"></div>
+
+  <div>
+    <button onclick="newAyah()">🔄 New Ayah</button>
+    <button onclick="bookmark()">❤️ Save</button>
+    <button onclick="playAudio()">🔊 Listen</button>
+  </div>
+
+  <div id="savedBox"></div>
+
+</div>
+
+<script>
+let todayAyah = null;
+let audioPlayer = null;
+
+/* 🧠 DAILY AYAH (ONCE PER DAY) */
+async function newAyah() {
+
+  const todayKey = new Date().toDateString();
+  const savedToday = localStorage.getItem("dailyAyahDate");
+
+  // If already generated today → reuse it
+  if (savedToday === todayKey && localStorage.getItem("dailyAyah")) {
+    todayAyah = JSON.parse(localStorage.getItem("dailyAyah"));
+    showAyah();
+    return;
+  }
+
+  const randomAyah = Math.floor(Math.random() * 6236) + 1;
+
+  const res = await fetch(
+    `https://api.alquran.cloud/v1/ayah/${randomAyah}/editions/quran-uthmani,en.transliteration,en.asad,ar.alafasy`
+  );
+
+  const data = await res.json();
+
+  const arabic = data.data.find(x => x.edition.type === "quran");
+  const transliteration = data.data.find(x => x.edition.identifier === "en.transliteration");
+  const translation = data.data.find(x => x.edition.identifier === "en.asad");
+  const audio = data.data.find(x => x.edition.format === "audio");
+
+  todayAyah = {
+    arabic: arabic.text,
+    transliteration: transliteration.text,
+    translation: translation.text,
+    audio: audio.audio,
+    surah: arabic.surah.englishName,
+    surahArabic: arabic.surah.name,
+    ayahInSurah: arabic.numberInSurah
+  };
+
+  // Save for today
+  localStorage.setItem("dailyAyah", JSON.stringify(todayAyah));
+  localStorage.setItem("dailyAyahDate", todayKey);
+
+  showAyah();
+}
+
+/* 📖 DISPLAY */
+function showAyah() {
+  if (!todayAyah) return;
+
+  const cleanTranslation = todayAyah.translation
+    .replace(/—/g, "")
+    .replace(/–/g, "")
+    .replace(/-/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  document.getElementById("ayahBox").innerHTML = `
+    <div style="font-size:13px;color:gray;margin-bottom:8px;">
+      📖 ${todayAyah.surah} (${todayAyah.surahArabic}) Ayah ${todayAyah.ayahInSurah}
+    </div>
+
+    <div class="arabic">${todayAyah.arabic}</div>
+
+    <div class="trans">${todayAyah.transliteration}</div>
+
+    <div class="translation" style="font-size:16px;color:#333;margin-top:10px;">
+      ${cleanTranslation}
+    </div>
+  `;
+}
+
+/* 🌙 DARK MODE */
+function toggleDark() {
+  document.body.classList.toggle("dark");
+}
+
+/* ❤️ SAVE (NO DUPLICATES) */
+function bookmark() {
+  if (!todayAyah) return;
+
+  let saved = JSON.parse(localStorage.getItem("savedAyahs")) || [];
+
+  // prevent duplicates
+  const exists = saved.some(a =>
+    a.surah === todayAyah.surah &&
+    a.ayahInSurah === todayAyah.ayahInSurah
+  );
+
+  if (!exists) {
+    saved.push(todayAyah);
+    localStorage.setItem("savedAyahs", JSON.stringify(saved));
+  }
+
+  showSaved();
+}
+
+/* 📤 SHARE */
+function shareAyah() {
+  if (!todayAyah) return;
+
+  const text = `${todayAyah.arabic}
+
+${todayAyah.translation}
+
+— ${todayAyah.surah} ${todayAyah.ayahInSurah}`;
+
+  navigator.clipboard.writeText(text);
+  alert("Copied to clipboard 📋");
+}
+
+/* 🔊 AUDIO */
+function playAudio() {
+  if (!todayAyah || !todayAyah.audio) return;
+
+  if (audioPlayer) audioPlayer.pause();
+
+  audioPlayer = new Audio(todayAyah.audio);
+  audioPlayer.play();
+}
+
+/* 📂 SHOW SAVED */
+function showSaved() {
+  let saved = JSON.parse(localStorage.getItem("savedAyahs")) || [];
+
+  document.getElementById("savedBox").innerHTML =
+    "<h3>❤️ Saved Ayahs</h3>" +
+    saved.map((a, index) => `
+      <div class="saved-item" id="saved-${index}">
+
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <b>${a.surah} ${a.ayahInSurah}</b>
+
+          <button onclick="deleteSaved(event, ${index})"
+            style="background:red;font-size:12px;padding:5px 8px;">
+            ❌
+          </button>
+        </div>
+
+        <!-- ❗ NOW ALWAYS VISIBLE (NO CLICK REQUIRED) -->
+        <div style="margin-top:10px;">
+          
+          <div style="font-size:18px; line-height:1.8;">
+            ${a.arabic}
+          </div>
+
+          <div style="font-size:13px;color:#2c7a7b;font-style:italic;">
+            ${a.transliteration}
+          </div>
+
+          <div style="margin-top:5px;">
+            ${a.translation}
+          </div>
+
+        </div>
+
+      </div>
+    `).join("");
+}
+function toggleSaved(index) {
+  const el = document.querySelector(`#saved-${index} .saved-content`);
+
+  if (el.style.display === "none") {
+    el.style.display = "block";
+  } else {
+    el.style.display = "none";
+  }
+}
+function deleteSaved(event, index) {
+  event.stopPropagation(); // prevent toggle click
+
+  let saved = JSON.parse(localStorage.getItem("savedAyahs")) || [];
+
+  saved.splice(index, 1);
+
+  localStorage.setItem("savedAyahs", JSON.stringify(saved));
+
+  showSaved();
+}
+/* 🚀 INIT */
+newAyah();
+showSaved();
+</script>
+
+</body>
+</html>

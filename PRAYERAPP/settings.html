@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Settings</title>
+
+<style>
+:root{
+  --bg:#f3f4f6;
+  --card:#ffffff;
+  --text:#111;
+  --sub:#777;
+  --border:#e5e5e5;
+  --accent:#4caf50;
+}
+
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
+
+body.dark{
+  --bg:#121212;
+  --card:#1e1e1e;
+  --text:#fff;
+  --sub:#aaa;
+  --border:#2a2a2a;
+}
+
+.header{
+  padding:20px 18px;
+  font-size:28px;
+  font-weight:700;
+  background:var(--card);
+  border-bottom:1px solid var(--border);
+
+  position:sticky;
+  top:0;
+  z-index:100;
+
+  backdrop-filter:blur(10px);
+}
+.item,
+.toggle{
+  transition:0.2s ease;
+}
+
+.item:hover,
+.toggle:hover{
+  background:rgba(0,0,0,0.03);
+}
+
+.title{
+  padding:14px 16px 6px;
+  font-size:12px;
+  color:var(--sub);
+  text-transform:uppercase;
+}
+
+.item, .toggle{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:14px 16px;
+  border-bottom:1px solid var(--border);
+  background:var(--card);
+}
+
+select{
+  padding:6px;
+}
+
+/* SWITCH */
+.switch{
+  width:42px;
+  height:22px;
+  background:#ccc;
+  border-radius:20px;
+  position:relative;
+  cursor:pointer;
+}
+
+.switch::after{
+  content:"";
+  position:absolute;
+  width:18px;
+  height:18px;
+  background:white;
+  border-radius:50%;
+  top:2px;
+  left:2px;
+  transition:0.3s;
+}
+
+.switch.active{
+  background:var(--accent);
+}
+
+.switch.active::after{
+  left:22px;
+}
+/* TOAST */
+#toast{
+  position:fixed;
+  left:50%;
+  bottom:20px;
+  transform:translateX(-50%) translateY(20px);
+
+  min-width:220px;
+  max-width:320px;
+
+  background:#1f2937;
+  color:white;
+
+  padding:14px 18px;
+  border-radius:16px;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:15px;
+  font-weight:500;
+  line-height:1.4;
+
+  box-shadow:
+    0 10px 30px rgba(0,0,0,0.25);
+
+  opacity:0;
+  visibility:hidden;
+
+  transition:
+    opacity .3s ease,
+    transform .3s ease,
+    visibility .3s;
+    
+  z-index:2000;
+}
+
+/* SHOW */
+#toast.show{
+  opacity:1;
+  visibility:visible;
+  transform:translateX(-50%) translateY(0);
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">Settings</div>
+
+<!-- APPEARANCE -->
+<div class="title">Appearance</div>
+
+<div class="item">
+  🎨 Theme
+  <select onchange="setTheme(this.value)">
+    <option value="light">Light</option>
+    <option value="dark">Dark</option>
+  </select>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="title">Notifications</div>
+
+<div class="toggle">🔔 Enable Notifications
+  <div class="switch" onclick="openNotifModal(this)" id="notifSwitch"></div>
+</div>
+
+<div class="toggle">📖 Daily Ayah
+  <div class="switch" onclick="toggleSimple(this,'ayahNotif')"></div>
+</div>
+
+<div class="toggle">🌅 Morning Adhkar
+  <div class="switch" onclick="toggleSimple(this,'morningNotif')"></div>
+</div>
+
+<div class="toggle">🌇 Evening Adhkar
+  <div class="switch" onclick="toggleSimple(this,'eveningNotif')"></div>
+</div>
+
+<div class="toggle">🌙 Sleep Adhkar
+  <div class="switch" onclick="toggleSimple(this,'sleepNotif')"></div>
+</div>
+
+<div class="item">
+  🎧 Adhan Sound
+  <select id="adhanSound" onchange="changeAdhan(this.value)">
+    <option value="makkah">Makkah</option>
+    <option value="madinah">Madinah</option>
+  </select>
+</div>
+
+<!-- CONTENT -->
+<div class="title">Content</div>
+
+<div class="item">
+  🔁 Refresh
+  <select id="refreshRate" onchange="saveSetting('refreshRate')">
+    <option value="daily">Daily</option>
+    <option value="weekly">Weekly</option>
+  </select>
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+
+/* THEME */
+function setTheme(theme){
+  document.body.classList.toggle("dark", theme === "dark");
+  localStorage.setItem("theme", theme);
+}
+
+/* SIMPLE TOGGLES */
+function toggleSimple(el,key){
+  el.classList.toggle("active");
+  localStorage.setItem(key, el.classList.contains("active"));
+}
+
+/* TOAST */
+function showToast(msg){
+
+  const t = document.getElementById("toast");
+
+  t.innerHTML = msg;
+
+  t.classList.add("show");
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer = setTimeout(()=>{
+    t.classList.remove("show");
+  },2500);
+}
+
+/* NOTIFICATION PERMISSION */
+function openNotifModal(el){
+
+  if(Notification.permission === "granted"){
+
+    el.classList.add("active");
+
+    localStorage.setItem("notif","true");
+
+    showToast("🔔 Notifications enabled");
+
+    return;
+  }
+
+  if(Notification.permission === "denied"){
+
+    showToast("⚠️ Notifications blocked");
+
+    return;
+  }
+
+  Notification.requestPermission().then(permission => {
+
+    if(permission === "granted"){
+
+      el.classList.add("active");
+
+      localStorage.setItem("notif","true");
+
+      showToast("🕌 Prayer reminders enabled");
+
+      new Notification("Adhan Reminder",{
+        body:"You'll now receive prayer alerts 🕌"
+      });
+
+    } else {
+
+      el.classList.remove("active");
+
+      showToast("❌ Permission denied");
+    }
+
+  });
+
+}
+/* ADHAN SOUND */
+let audio;
+
+function changeAdhan(type){
+  localStorage.setItem("adhanSound", type);
+
+  if(audio) audio.pause();
+
+  let file = type === "makkah"
+    ? "sounds/makkah.mp3"
+    : "sounds/madinah.mp3";
+
+  audio = new Audio(file);
+  audio.play();
+}
+
+/* SAVE DROPDOWN */
+function saveSetting(key){
+  let el = document.getElementById(key);
+  if(el){
+    localStorage.setItem(key, el.value);
+  }
+}
+
+/* LOAD SETTINGS */
+window.onload = function(){
+
+  let theme = localStorage.getItem("theme") || "light";
+  setTheme(theme);
+
+  ["ayahNotif","morningNotif","eveningNotif","sleepNotif"].forEach(k=>{
+    if(localStorage.getItem(k) === "true"){
+      let el = document.querySelector(`[onclick*="${k}"]`);
+      if(el) el.classList.add("active");
+    }
+  });
+
+  if(localStorage.getItem("notif") === "true"){
+    document.getElementById("notifSwitch").classList.add("active");
+  }
+
+  let adhan = localStorage.getItem("adhanSound");
+  if(adhan){
+    document.getElementById("adhanSound").value = adhan;
+  }
+
+  let refresh = localStorage.getItem("refreshRate");
+  if(refresh){
+    document.getElementById("refreshRate").value = refresh;
+  }
+};
+
+</script>
+
+</body>
+</html>
